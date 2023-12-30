@@ -10,6 +10,7 @@ import Profile from './Component/Profile/Profile';
 import Destination from './Component/Destination/Destination';
 import Tips from './Component/Tips/Tips';
 import Home from './Component/Home/Home';
+import Post from './Component/Post/Postdetail';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
@@ -28,6 +29,7 @@ root.render(
         <Route path="/Destination" element={<Destination />} />
         <Route path="/Tips" element={<Tips />} />
         <Route path="/Home" element={<Home />} />
+        <Route path="/Post" element={<Post />} />
       </Routes>
     </BrowserRouter>
 

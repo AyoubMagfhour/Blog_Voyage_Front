@@ -6,8 +6,39 @@ import Employer from "../../images/employer.jpg";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
+import { styled } from '@mui/material/styles';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 const Profile = () => {
+  const [openModal, setOpenModal] = useState(false);
+
+    const handleOpenModal = () => {
+      setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+      setOpenModal(false);
+    };
   return (
     <div style={{ overflowX: "hidden" }}>
       <div id="header">
@@ -78,7 +109,7 @@ const Profile = () => {
                 nulla pariatur. Excepteur sint occaecat cupidatat non proident,
                 sunt in culpa qui officia deserunt mollit anim id est laborum.
               </div>
-              <i class="float-end mx-3">
+              <i class="float-end mx-3" onClick={handleOpenModal}>
                 <SystemUpdateAltIcon />
               </i>
             </div>
@@ -284,6 +315,73 @@ const Profile = () => {
           <div class="col"></div>
         </div>
       </footer>
+      {/*Modale*/}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Modifier Profil</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please fill out the form below:
+          </DialogContentText>
+          <form >
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Prenom"
+              label="Prenom"
+              type="text"
+              fullWidth
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="nom"
+              label="Nom"
+              type="text"
+              fullWidth
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="Email"
+              type="text"
+              fullWidth
+              required
+              disabled
+            />
+             <TextField
+              autoFocus
+              margin="dense"
+              id="password"
+              label="Password"
+              type="text"
+              fullWidth
+              required
+            />
+            <TextField
+              margin="dense"
+              id="email"
+              label="Description"
+              fullWidth
+              required
+              multiline
+              maxRows={4}
+            />
+            <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+              Upload file
+              <VisuallyHiddenInput type="file" />
+            </Button>
+            <DialogActions>
+              <Button onClick={handleCloseModal}>Cancel</Button>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

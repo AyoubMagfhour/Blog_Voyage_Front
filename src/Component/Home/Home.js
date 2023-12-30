@@ -15,12 +15,44 @@ import Menu from '@mui/material/Menu';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
+import { styled } from '@mui/material/styles';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
+
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 
 const Home = () => {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const [email, setEmail] = useState('');
     const [user, setUser] = useState('');
+    const [openModal, setOpenModal] = useState(false);
+
+    const handleOpenModal = () => {
+      setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+      setOpenModal(false);
+    };
 
 
     useEffect(() => {
@@ -153,7 +185,7 @@ const Home = () => {
         <div class="row my-4">
           <div class="col-1"></div>
           <div class="col-4">
-            <button className="d-flex my-3 shadow-lg" id="posté">
+            <button className="d-flex my-3 shadow-lg" id="posté" onClick={handleOpenModal}>
               <p class="my-2">Share Your Experience</p>
               <img class="img-fluid" src={Plane} width={50} />
             </button>
@@ -522,6 +554,46 @@ const Home = () => {
           <div class="col"></div>
         </div>
       </footer>
+
+      {/*Modale*/}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Share Your Experience</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please fill out the form below:
+          </DialogContentText>
+          <form >
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Titre"
+              type="text"
+              fullWidth
+              required
+            />
+            <TextField
+              margin="dense"
+              id="email"
+              label="Description"
+              fullWidth
+              required
+              multiline
+              maxRows={4}
+            />
+            <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+              Upload file
+              <VisuallyHiddenInput type="file" />
+            </Button>
+            <DialogActions>
+              <Button onClick={handleCloseModal}>Cancel</Button>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
