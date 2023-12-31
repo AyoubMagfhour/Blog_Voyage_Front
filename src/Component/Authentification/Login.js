@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import axios from 'axios'; 
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import './Login.css';
 import TextField from '@mui/material/TextField';
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -20,18 +20,21 @@ const Login = ({history}) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const user = {
+      email: username,
+      password: password,
+    };
   
     try {
-      const user = {
-        email: username,
-        password: password,
-      };
+      
   
-      const response = await axios.post('http://localhost:8080/user/login', user);
+      const response = await axios.post('http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/login', user);
   
       if (response.status === 200) {
         const userInfo = response.data;
+        const userid = response.data.id;
         sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+        sessionStorage.setItem('userId', userid);
         setMessage('Login successful');
         navigate('/Home');
 
@@ -40,6 +43,7 @@ const Login = ({history}) => {
       }
     } catch (error) {
       console.error('Error:', error);
+      console.log(user);
       setMessage('An error occurred during login');
     }
   };
@@ -93,7 +97,7 @@ const Login = ({history}) => {
               <div class="col">
                 <br></br>
                 <br></br>
-                <Link to="/Create_Accout" style={{color : '#FFA500' , fontWeight : 500 }}>Créer Votre Compte</Link>
+                <Link to="/Create_Accout" style={{color : '#FFA500' , fontWeight : 500 }}>CrÃ©er Votre Compte</Link>
               </div>
               <div class="col">
                 <Link to="/Email_Recup" style={{color : '#FFA500' , marginLeft : '95px' , marginBottom : '30px' , fontWeight : 500}}>Mot de passe oublier ?</Link>

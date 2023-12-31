@@ -16,7 +16,25 @@ const Login = () => {
     const [message, setMessage] = useState('');
 
 
-
+    const handleCheckButtonClick = async (e) => {
+      e.preventDefault(); 
+    
+      const response = await axios.get(`http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/by-email?email=${username}`);
+  
+      if (response.data) {
+        
+        const userId = response.data.id; 
+  
+    
+        await axios.post(`http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/sendemail?email=${username}&id=${userId}`);
+  
+        alert(`Email exists. Email sent to ${username}`);
+      } else {
+   
+        alert('Email does not exist. Please enter a valid email.');
+      }
+    };
+  
     return (
         <div id='login_container'>
           
@@ -24,7 +42,7 @@ const Login = () => {
             
             <div class='col' id='login'>
               
-              <form>
+              <form onSubmit={handleCheckButtonClick} >
               <img src={Travellogo} style={{width : '350px',marginLeft : '40px'}} />
                 <div>
                   <TextField 

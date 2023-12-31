@@ -39,3 +39,6 @@
 #des{
     text-align: justify;
 }
+.remove-hover:hover {
+    background-color: transparent !important; /* Set the background to transparent on hover */
+}

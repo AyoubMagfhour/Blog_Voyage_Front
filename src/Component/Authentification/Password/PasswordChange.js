@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import axios from 'axios'; 
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import '../Login.css';
 import TextField from '@mui/material/TextField';
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -12,10 +13,52 @@ import ContactEmergencyIcon from '@mui/icons-material/ContactEmergency';
 
 
 const PasswordChange = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
+    const [password2, setPassword2] = useState('');
+    const { id } = useParams()
 
+
+    useEffect(() => {
+      fetchData(); // Call the fetchData function when the component mounts
+    }, [id]); // Run the effect whenever the id changes
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/${id}`);
+        // Assuming your API returns user data in response.data
+        const userData = response.data;
+
+        // Update the state with user data
+        setEmail(userData.email); // Replace 'username' with the actual property name in your user data
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    const handleUpdatePassword = async (e) => {
+      e.preventDefault();
+  
+      if (password !== password2) {
+        // Handle password mismatch
+        alert('Passwords do not match.');
+        return;
+      }
+  
+      try {
+        const response = await axios.put(`http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/updatePassword/${id}`, {
+          Password: password,
+        });
+  
+        if (response.data) {
+          alert('Password updated successfully.');
+        } else {
+          alert('Failed to update password.');
+        }
+      } catch (error) {
+        console.error('Error updating password:', error);
+        alert('An error occurred while updating the password.');
+      }
+    };
     return (
         <div id='login_container'>
           
@@ -23,14 +66,14 @@ const PasswordChange = () => {
             
             <div class='col' id='login'>
               
-              <form>
+              <form onSubmit={handleUpdatePassword}> 
               <img src={Travellogo} style={{width : '350px',marginLeft : '40px'}} />
                 <div class="my-3">
                   <TextField 
                     style={{width : '450px'}}
                     id="outlined-basic" 
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
                     label="Email" variant="outlined" 
                     InputProps={{
                       startAdornment: (
@@ -62,9 +105,9 @@ const PasswordChange = () => {
                   <TextField 
                     style={{width : '450px'}}
                     id="outlined-basic" 
-                    value={password}
+                    value={password2}
                     type="password"
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setPassword2(e.target.value)}
                     label="Confirm Password" variant="outlined" 
                     InputProps={{
                       startAdornment: (
@@ -105,7 +148,7 @@ const PasswordChange = () => {
                 </div>
                     
               </form>
-              {message && <p>{message} + <strong>{username} + {password}</strong></p>}
+              
             </div>
             <div class='col' id='image_login'></div>
           </div>

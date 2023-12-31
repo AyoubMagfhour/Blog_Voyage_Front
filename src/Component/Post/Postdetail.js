@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Post.css";
 import Logop from "../../images/logop.png";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
@@ -19,11 +20,19 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Splide from "@splidejs/splide";
 import "@splidejs/splide/dist/css/themes/splide-default.min.css";
+import SendIcon from '@mui/icons-material/Send';
 
 const Post = () => {
+  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [email, setEmail] = useState("");
+  const [post, setPost] = useState({});
+  const [storedUserId, setStored] = useState("");
+  const [data, setData] = useState(null);
+  const [commentText, setCommentText] = useState("");
+  const [comment, setComment] = useState([]);
   const [user, setUser] = useState("");
+  const { id } = useParams();
   const splideRef = useRef(null);
   const images = [
     "https://images.unsplash.com/photo-1552083375-1447ce886485?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bmF0dXJlJTIwd2FsbHBhcGVyfGVufDB8fDB8fHww",
@@ -36,12 +45,12 @@ const Post = () => {
   ];
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem("user");
-
+    const storedUser = sessionStorage.getItem("userInfo");
+    setStored(storedUser);
     if (storedUser) {
       // Parse the stored user string back to an object
       const parsedUser = JSON.parse(storedUser);
-
+      console.log(parsedUser);
       // Extract email if available
       const { email: storedEmail } = parsedUser;
       if (storedEmail) {
@@ -73,13 +82,116 @@ const Post = () => {
   const getUserByEmail = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/user/by-email?email=${email}`
+        `http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/by-email?email=${email}`
       );
       setUser(response.data);
     } catch (error) {
       console.error("Error fetching user:", error);
       return null;
     }
+  };
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("userId");
+    const storedUser = sessionStorage.getItem("userInfo");
+
+    fetchuser();
+
+    fetchData();
+    fetchCommentData();
+    // Call the fetchData function when the component mounts
+  }, [id]); // Run the effect whenever the id changes
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8888/SERVICE-POST/api/posts/${id}`
+      );
+      // Assuming your API returns post data in response.data
+      const postData = response.data;
+
+      // Update the state with post data
+      setPost(postData);
+    } catch (error) {
+      console.error("Error fetching post data:", error);
+    }
+  };
+
+  const fetchCommentData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8888/SERVICE-COMMENTAIRE/api/commentaires/post/${id}`
+      );
+      // Assuming your API returns comment data in response.data
+      const commentData = response.data;
+
+      // Update the state with comment data
+      setComment(commentData);
+    } catch (error) {
+      console.error("Error fetching comment data:", error);
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Replace the URL with the actual endpoint for adding comments
+      const response = await axios.post(
+        "http://localhost:8888/SERVICE-COMMENTAIRE/api/commentaires/add",
+        {
+          comment: commentText,
+          post_id: id,
+          user_id: sessionStorage.getItem("userId"),
+        }
+      );
+
+      // Assuming your API returns the added comment in response.data
+      const addedComment = response.data;
+
+      // Handle the added comment as needed (e.g., update state, display a message)
+      console.log("Added Comment:", addedComment);
+      fetchCommentData();
+    } catch (error) {
+      console.error(
+        "Error adding comment:",
+        commentText,
+        id,
+        storedUserId.id,
+        error
+      );
+      // Handle the error (e.g., display an error message)
+    }
+  };
+
+  const fetchuser = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8888/SERVICE-UTILISATEUR/api/ueser/${sessionStorage.getItem(
+          "userId"
+        )}`
+      );
+      // Check if there are posts in the response
+      if (response.data) {
+        // Extract the first post
+      }
+    } catch (error) {
+      // Handle error
+      console.error("Error fetching Post:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear user information from sessionStorage
+    sessionStorage.removeItem("userInfo");
+    sessionStorage.removeItem("userId");
+
+    // Redirect to the login page or any other desired route
+    navigate("/"); // Replace '/Login' with the route you want to navigate to after logout
+  };
+
+  const formatDate = (dateString) => {
+    const options = { month: "long", day: "numeric", year: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -129,10 +241,10 @@ const Post = () => {
                   </li>
                   <li class="nav-item mx-5">
                     <a class="nav-link" href="/Tips">
-                      Tips
+                      Favorite
                     </a>
                   </li>
-                  <li class="nav-item ">
+                  <li class="nav-item remove-hover">
                     <Box sx={{ flexGrow: 0 }}>
                       <Tooltip title="Open settings">
                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -160,7 +272,7 @@ const Post = () => {
                             {user.username}
                           </Typography>
                         </MenuItem>
-                        <MenuItem onClick={handleCloseUserMenu}>
+                        <MenuItem onClick={handleLogout}>
                           <Typography textAlign="center">
                             Déconnexion
                           </Typography>
@@ -178,9 +290,9 @@ const Post = () => {
         <div class="row my-5">
           <div class="col">
             <img
-              src="https://www.realsimple.com/thmb/oVzxWXKptXhpjxXWz5k2QOK654s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/hiking-benefits-2000-8006a4b1b6e14de3ad5e041c2b1c4f6e.jpg"
+              src={post.imagepost}
               class="img-fluid rounded  mx-auto d-block"
-              style={{ height: "500px" , marginTop: '100px' }}
+              style={{ height: "500px", marginTop: "100px" }}
               alt="..."
             />
 
@@ -202,77 +314,40 @@ const Post = () => {
             </div>
           </div>
           <div class="col">
-            <h2>Post Titre</h2>
-            <p>July, 15, 2021 - Tips and Tricks</p>
-            <h4>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </h4>
+            <h2>{post.title}</h2>
+            <p>{formatDate(post.date_poste)}</p>
+            <h4>{post.description}</h4>
             <div class="container">
-              <form class="my-3">
+              <form onSubmit={handleAddComment} class="my-3 d-flex">
                 <TextField
                   fullWidth
                   label="Comment"
                   color="warning"
                   focused
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
                   id="fullWidth"
                 />
+                <button type="submit" style={{width: '50px' , borderTopRightRadius :'15px',borderBottomRightRadius :'15px', color : 'black'}}> <SendIcon/></button>
               </form>
-              <div class="mx-5">
-                <Stack direction="row" spacing={2}>
-                  <Avatar
-                    alt="Remy Sharp"
-                    src="https://www.realsimple.com/thmb/oVzxWXKptXhpjxXWz5k2QOK654s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/hiking-benefits-2000-8006a4b1b6e14de3ad5e041c2b1c4f6e.jpg"
-                  />
-                  <p class="my-3">Comment</p>
-                </Stack>
-                <Stack direction="row" spacing={2}>
-                  <Avatar
-                    alt="Remy Sharp"
-                    src="https://www.realsimple.com/thmb/oVzxWXKptXhpjxXWz5k2QOK654s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/hiking-benefits-2000-8006a4b1b6e14de3ad5e041c2b1c4f6e.jpg"
-                  />
-                  <p class="my-3">Comment</p>
-                </Stack>
-                <Stack direction="row" spacing={2}>
-                  <Avatar
-                    alt="Remy Sharp"
-                    src="https://www.realsimple.com/thmb/oVzxWXKptXhpjxXWz5k2QOK654s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/hiking-benefits-2000-8006a4b1b6e14de3ad5e041c2b1c4f6e.jpg"
-                  />
-                  <p class="my-3">Comment</p>
-                </Stack>
+              <div class="">
+                {comment.map((comments) => (
+                  <Stack
+                    key={comments.id}
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                  >
+                    <Avatar
+                      alt="User Avatar"
+                      src={
+                        comments.usercomment.photo ||
+                        "https://example.com/default-avatar.jpg"
+                      }
+                    />
+                    <p className="my-3">{comments.comment}</p>
+                  </Stack>
+                ))}
               </div>
             </div>
           </div>
