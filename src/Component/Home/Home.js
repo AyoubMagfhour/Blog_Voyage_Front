@@ -62,6 +62,7 @@ const Home = () => {
   const [america2, setAmerica2] = useState("");
   const [asia, setAsia] = useState("");
   const [africa, setAfrica] = useState("");
+  
 
   const fetchCountries = async () => {
     try {
